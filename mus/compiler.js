@@ -17,7 +17,7 @@ var compiler=x(M={},{
 
     endTime:function F(time,expr) {  // calulate end time on a mus expr based on a given start time
         switch(expr.tag){
-            case 'rest':
+            case 'rest'  :
             case 'note'  :return time+expr.dur;
             case 'seq'   :return time+F(0,expr.left)+F(0,expr.right);
             case 'par'   :return time+Math.max(F(0,expr.left),F(0,expr.right));
