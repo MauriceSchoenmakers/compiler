@@ -3,7 +3,6 @@ var x=function(t,s1,s2){for(var i=1,l=arguments.length,s;i<l;++i){s=arguments[i]
 
 var compiler=x(M={},{
 
-    error:function(msg,expr){console.log(msg,expr); throw Error(msg+(expr&&expr.tag?': '+expr.tag:''));},
 
     compile: function F(expr,start){if(!start)start=0;
         switch(expr.tag){
@@ -13,7 +12,7 @@ var compiler=x(M={},{
             case 'par'   : return F(expr.left,start).concat(F(expr.right,start));
             case 'repeat': return 0==expr.count?[]:F(expr.section,start).concat(F((expr.count--,expr),M.endTime(start,expr.section)));
         }
-        return M.error('unknown tag:',expr);
+        return M.error('unknown tag',expr);
     },
 
     endTime:function F(time,expr) {  // calulate end time on a mus expr based on a given start time
@@ -24,16 +23,18 @@ var compiler=x(M={},{
             case 'par' :return time+Math.max(F(0,expr.left),F(0,expr.right));
             case 'repeat': return time+expr.count*F(0,expr.section); // not really needed as done by recursion in compile
         }
-        return M.error('unknown tag:',expr);
+        return M.error('unknown tag',expr);
     },
 
     convertPitch:x(function F(pitch){
         return 12 + 12 * parseInt(pitch[1],10) + F.letter2pitch[pitch[0]];
     },{letter2pitch:{c:0,d:2,e:4,f:5,g:7,a:9,b:11}}), // now idea where this data comes from?, see http://www.phys.unsw.edu.au/jw/notes.html
 
+    error:function(msg,expr){throw x(Error(msg+(expr&&expr.tag?': '+expr.tag:'')),{expression:expr});},
+
     // loop over test set and log results
-    test:x(function F(){ for(name in F.set) F.log(name,F.set[name]); },{
-        log:function(name,t){console.log('\n\n\n=== TEST:'+name+' ===\n',t,'\n\n--- compile result ---\n', M.compile(t));},
+    test:x(function F(){ for(name in F.set) try{F.log(name,F.set[name]);}catch(e){console.log("Exception:",e);} },{
+        log:function(name,t){console.log('\n\n\n=== TEST:'+name+' ===\n',t,'\n\n--- compile result ---\n');console.log(M.compile(t));},
 
         set:{
 
@@ -73,6 +74,9 @@ var compiler=x(M={},{
                         count: 5
                     }
                 }
+            },
+
+            'error':{ tag : 'murks'
             }
         }
     })
